@@ -1,58 +1,75 @@
 <!DOCTYPE html>
 
 <html>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
-  <script src="confetti.js"></script>
-  <script src="confettiCube.js"></script>
-  <script src="index.js"></script>
-  <link rel="stylesheet" href="index.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
+<script src="confetti.js"></script>
+<script src="confettiCube.js"></script>
+<script src="index.js"></script>
+<link rel="stylesheet" href="index.css" />
 
-  <head>
+<head>
     <title>Virutal Rubik's Cube</title>
-  </head>
+</head>
 
-  <body>
-      <div id="confettiContainer">
-          <canvas id="confetti"></canvas>
-      </div>
-
-    <div class="info">
-      <h3>Virtual Rubik's Cube</h3>
-      <div class="legend">
-        <p>Drag to scan.</p>
-        <p>Scroll to zoom.</p>
-
-        <p>0 to reset the cube.</p>
-
-        <div id="free">
-            <p>Currently in free mode.</p>
-            <p>CW : f b l r u d</p>
-            <p>CCW: F B L R U D</p>
-            <p>Press s to solve current cube.</p>
+<body>
+    <div id="pre" style="height: 100%;position: absolute;left: 0;right: 0;top: 0;bottom: 0;display: flex;">
+        <div class="sk-cube-grid" style="margin: auto;">
+            <div class="sk-cube sk-cube1"></div>
+            <div class="sk-cube sk-cube2"></div>
+            <div class="sk-cube sk-cube3"></div>
+            <div class="sk-cube sk-cube4"></div>
+            <div class="sk-cube sk-cube5"></div>
+            <div class="sk-cube sk-cube6"></div>
+            <div class="sk-cube sk-cube7"></div>
+            <div class="sk-cube sk-cube8"></div>
+            <div class="sk-cube sk-cube9"></div>
         </div>
-
-        <div id="solving">
-            <p>Currently in solving mode.</p>
-            <p>Right arrow to advance to next move.</p>
-            <p>e to exit solving mode.</p>
-        </div>
-      </div>
     </div>
 
-    <p id="current_move"></p>
+    <div id="post" class="hidden">
+        <div id="confettiContainer">
+            <canvas id="confetti"></canvas>
+        </div>
 
-    <p class="author">Calvin, Hamdan, Haven, Adrian, Seikun, Jessica.</a></p>
-  </body>
+        <div class="info">
+            <h3>Virtual Rubik's Cube</h3>
+            <div class="legend">
+                <p>Drag to scan.</p>
+                <p>Scroll to zoom.</p>
 
-  <script>
+                <p>0 to reset the cube.</p>
+
+                <div id="free">
+                    <p>Currently in free mode.</p>
+                    <p>CW : f b l r u d</p>
+                    <p>CCW: F B L R U D</p>
+                    <p>Press s to solve current cube.</p>
+                </div>
+
+                <div id="solving">
+                    <p>Currently in solving mode.</p>
+                    <p>Right arrow to advance to next move.</p>
+                    <p>e to exit solving mode.</p>
+                </div>
+            </div>
+        </div>
+
+        <p id="current_move"></p>
+
+        <p class="author">Calvin, Hamdan, Haven, Adrian, Seikun, Jessica.</a>
+        </p>
+    </div>
+</body>
+
+<script>
     var author = document.getElementsByClassName('author')[0];
     author.addEventListener('mouseover', function() {
-      author.style.opacity = 0.5;
+        author.style.opacity = 0.5;
     });
     author.addEventListener('mouseout', function() {
-      author.style.opacity = 0;
+        author.style.opacity = 0;
     });
-  </script>
+</script>
 
 </html>

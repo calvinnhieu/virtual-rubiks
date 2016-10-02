@@ -1300,6 +1300,8 @@ function init() {
     setTimeout(function() {
         freeCube = new Cube();
         Cube.initSolver();
+        document.getElementById("pre").style.display = "none";
+        document.getElementById("post").classList.remove("hidden");
 
         canvas = Confetti.createCanvas(document.getElementById("confettiContainer"),
                                        document.getElementById("confetti"));
@@ -1451,6 +1453,7 @@ function doMoves(string) {
         currentMove = 0;
         moves = string.split(" ");
         console.log("Solving: " + string);
+        nextMove();
     }
 }
 
