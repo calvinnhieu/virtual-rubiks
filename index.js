@@ -10,7 +10,7 @@
  * Hold shift to perform CCW rotations.
  *
  */
-var scene, camera, renderer;
+var scene, camera, renderer, pivot;
 var geometry, material;
 var cubeMeshArray = new Array();
 var controls;
@@ -54,6 +54,7 @@ function init() {
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
     scene = new THREE.Scene();
+    pivot = new THREE.Object3D();
 
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
     camera.position.z = 1000;
@@ -80,12 +81,13 @@ function init() {
     // create cube pieces
     for (var i = 0; i < 27; i++) {
       cubeMeshArray[i] = new THREE.Mesh( geometry, material );
-      cubeMeshArray[i].position.x = (i * (SIZE+MARGIN)) % ((SIZE+MARGIN)*3) - SIZE*3/2;
-      cubeMeshArray[i].position.y = (Math.floor((i%9)/3) * (SIZE+MARGIN)) - SIZE*3/2;
-      cubeMeshArray[i].position.z = Math.floor(i/9) * (SIZE+MARGIN) - SIZE*3/2;
+      cubeMeshArray[i].position.x = (i * (SIZE+MARGIN)) % ((SIZE+MARGIN)*3) - (SIZE+MARGIN);
+      cubeMeshArray[i].position.y = (Math.floor((i%9)/3) * (SIZE+MARGIN)) - (SIZE+MARGIN);
+      cubeMeshArray[i].position.z = Math.floor(i/9) * (SIZE+MARGIN) - (SIZE+MARGIN);
       cubeMeshArray[i].callback = function() { console.log('click piece'); }
       scene.add( cubeMeshArray[i] );
     }
+    scene.add(pivot);
 
     renderer = new THREE.WebGLRenderer();
     renderer.setSize( window.innerWidth, window.innerHeight );
@@ -137,47 +139,78 @@ function onDocumentMouseDown(e) {
 // do* functions perform cube instructions
 // @param doPrime  performs instruction CCW if true
 function doF(doPrime = false) {
-  for (var i = 18; i < 27; i++) {
-    rotateAroundWorldAxis(cubeMeshArray[i], Z_AXIS, doPrime ? Math.PI / 2 : Math.PI * 3/2);
-    render();
-  }
+  var toRotate = cubeMeshArray.filter(function(obj, i) {
+    return SIZE <= obj.position.z && obj.position.z < SIZE + 2*MARGIN;
+  });
+
+  startRotation(toRotate);
+  rotateAroundWorldAxis(pivot, Z_AXIS, doPrime ? Math.PI / 2 : Math.PI * 3/2);
+  render();
+  endRotation(toRotate);
 }
 function doB(doPrime = false) {
-  for (var i = 0; i < 9; i++) {
-    rotateAroundWorldAxis(cubeMeshArray[i], Z_AXIS, doPrime ? Math.PI * 3/2 : Math.PI / 2);
-    render();
-  }
+  var toRotate = cubeMeshArray.filter(function(obj, i) {
+    return -(SIZE + 2*MARGIN) <= obj.position.z && obj.position.z <  -SIZE;
+  });
+
+  startRotation(toRotate);
+  rotateAroundWorldAxis(pivot, Z_AXIS, doPrime ? Math.PI * 3/2 : Math.PI / 2);
+  render();
+  endRotation(toRotate);
 }
 function doL(doPrime = false) {
-  for (var i = 0; i < cubeMeshArray.length; i++) {
-    if (i%3 === 0) {
-      rotateAroundWorldAxis(cubeMeshArray[i], X_AXIS, doPrime ? Math.PI * 3/2  : Math.PI / 2);
-      render();
-    }
-  }
+  var toRotate = cubeMeshArray.filter(function(obj, i) {
+    return -(SIZE + 2*MARGIN) <= obj.position.x && obj.position.x <  -SIZE;
+  });
+
+  startRotation(toRotate);
+  rotateAroundWorldAxis(pivot, X_AXIS, doPrime ? Math.PI * 3/2  : Math.PI / 2);
+  render();
+  endRotation(toRotate);
 }
 function doR(doPrime = false) {
-  for (var i = 0; i < cubeMeshArray.length; i++) {
-    if ((i-2) % 3 === 0) {
-      rotateAroundWorldAxis(cubeMeshArray[i], X_AXIS, doPrime ? Math.PI / 2  : Math.PI * 3/2);
-      render();
-    }
-  }
+  var toRotate = cubeMeshArray.filter(function(obj, i) {
+    return SIZE <= obj.position.x && obj.position.x < SIZE + 2*MARGIN;
+  });
+
+  startRotation(toRotate);
+  rotateAroundWorldAxis(pivot, X_AXIS, doPrime ? Math.PI / 2  : Math.PI * 3/2);
+  render();
+  endRotation(toRotate);
 }
 function doU(doPrime = false) {
-  for (var i = 0; i < cubeMeshArray.length; i++) {
-    if (Math.floor((i%9)/3) === 2) {
-      rotateAroundWorldAxis(cubeMeshArray[i], Y_AXIS, doPrime ? Math.PI / 2 : Math.PI * 3/2);
-      render();
-    }
-  }
+  var toRotate = cubeMeshArray.filter(function(obj, i) {
+    return SIZE <= obj.position.y && obj.position.y < SIZE + 2*MARGIN;
+  });
+
+  startRotation(toRotate);
+  rotateAroundWorldAxis(pivot, Y_AXIS, doPrime ? Math.PI / 2 : Math.PI * 3/2);
+  render();
+  endRotation(toRotate);
 }
 function doD(doPrime = false) {
-  for (var i = 0; i < cubeMeshArray.length; i++) {
-    if (Math.floor((i%9)/3) === 0) {
-      rotateAroundWorldAxis(cubeMeshArray[i], Y_AXIS, doPrime ? Math.PI * 3/2 : Math.PI / 2);
-      render();
-    }
+  var toRotate = cubeMeshArray.filter(function(obj, i) {
+    return -(SIZE + 2*MARGIN) <= obj.position.y && obj.position.y <  -SIZE;
+  });
+
+  startRotation(toRotate);
+  rotateAroundWorldAxis(pivot, Y_AXIS, doPrime ? Math.PI * 3/2 : Math.PI / 2);
+  render();
+  endRotation(toRotate);
+}
+
+function startRotation(toRotate) {
+  pivot.rotation.set(0,0,0);
+  pivot.updateMatrixWorld();
+  for (i in toRotate) {
+    THREE.SceneUtils.attach(toRotate[i], scene, pivot);
+  }
+}
+function endRotation(rotated) {
+  pivot.updateMatrixWorld();
+  for (i in rotated) {
+    rotated[i].updateMatrixWorld();
+    THREE.SceneUtils.detach(rotated[i], pivot, scene);
   }
 }
 
