@@ -47,3 +47,7 @@ a:link, a:visited {
     width: 100%;
     height: 100%;
 }
+
+.highlight {
+    color: #2980b9;
+}
