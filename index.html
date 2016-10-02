@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+  <script src="index.js"></script>
+  <script src="three.min.js"></script>
+  <script src="TrackballControls.js"></script>
+  <link rel="stylesheet" href="index.css"/>
+
+  <head>
+    <title>Virutal Rubik's Cube</title>
+  </head>
+
+  <body>
+    <div class="legend">
+      <h3>Virtual Rubik's Cube</h3>
+      <p>Drag to scan.</p>
+      <p>Scroll to zoom.</p>
+      <p>F  = 1 | F' = Shift + 1</p>
+      <p>B  = 2 | B' = Shift + 2</p>
+      <p>L  = 3 | L' = Shift + 3</p>
+      <p>R  = 4 | R' = Shift + 4</p>
+      <p>U  = 5 | U' = Shift + 5</p>
+      <p>D  = 6 | D' = Shift + 6</p>
+    </div>
+
+    <p class="author"><a href="https://github.com/calvinnhieu" target="_blank">Calvin Nhieu, 10/02/16 NL.</a></p>
+  </body>
+
+  <script>
+    var author = document.getElementsByClassName('author')[0];
+    author.addEventListener('mouseover', function() {
+      author.style.opacity = 0.5;
+    });
+    author.addEventListener('mouseout', function() {
+      author.style.opacity = 0;
+    });
+  </script>
+
+</html>
