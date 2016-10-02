@@ -30,12 +30,12 @@ var BLUE = 0x2196f3;
 var CUBE_COLORS = [RED, ORANGE, WHITE, YELLOW, GREEN, BLUE];
 // TODO: replace with mouse drag events
 var keyToTurnMap = {
-  49: function(shiftKeyDown) { doF(shiftKeyDown) }, // 1
-  50: function(shiftKeyDown) { doB(shiftKeyDown) }, // 2
-  51: function(shiftKeyDown) { doL(shiftKeyDown) }, // 3
-  52: function(shiftKeyDown) { doR(shiftKeyDown) }, // 4
-  53: function(shiftKeyDown) { doU(shiftKeyDown) }, // 5
-  54: function(shiftKeyDown) { doD(shiftKeyDown) }, // 6
+  70: function(shiftKeyDown) { doF(shiftKeyDown) }, // f
+  66: function(shiftKeyDown) { doB(shiftKeyDown) }, // b
+  76: function(shiftKeyDown) { doL(shiftKeyDown) }, // l
+  82: function(shiftKeyDown) { doR(shiftKeyDown) }, // r
+  85: function(shiftKeyDown) { doU(shiftKeyDown) }, // u
+  68: function(shiftKeyDown) { doD(shiftKeyDown) }, // f
 }
 
 var X_AXIS;
@@ -98,6 +98,10 @@ function init() {
 
       if (action) {
         action(e.shiftKey);
+      } else if (e.keyCode === 72) {
+        var el = document.getElementsByClassName('legend')[0];
+
+        el.style.opacity = el.style.opacity == 0 ? 1 : 0;
       }
     });
     document.addEventListener('mousedown', function(e) {
