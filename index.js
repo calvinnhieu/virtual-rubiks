@@ -10,12 +10,21 @@
  * Hold shift to perform CCW rotations.
  *
  */
+var Modes = {
+    FREE: 0,
+    SOLVING: 1
+}
+var mode = Modes.FREE;
+
 var scene, camera, renderer, pivot;
 var geometry, material;
 var cubeMeshArray = new Array();
 var controls;
 
 var raycaster, mouse;
+
+var currentMove;
+var moves;
 
 var rotating = false;
 
@@ -31,7 +40,7 @@ var BLUE = 0x2196f3;
 
 var CUBE_COLORS = [RED, ORANGE, WHITE, YELLOW, GREEN, BLUE];
 // TODO: replace with mouse drag events
-var keyToTurnMap = {
+var freeKeyToTurnMap = {
     70: function(shiftKeyDown) { doF(shiftKeyDown) }, // f
     66: function(shiftKeyDown) { doB(shiftKeyDown) }, // b
     76: function(shiftKeyDown) { doL(shiftKeyDown) }, // l
@@ -45,6 +54,10 @@ var keyToTurnMap = {
     52: function(shiftKeyDown) { doR(shiftKeyDown) }, // 4
     53: function(shiftKeyDown) { doU(shiftKeyDown) }, // 5
     54: function(shiftKeyDown) { doD(shiftKeyDown) }, // 6
+}
+
+var solvingKeyMap = {
+    39: nextMove        // right
 }
 
 var X_AXIS;
@@ -109,7 +122,8 @@ function init() {
 
         // init test event listeners
         document.addEventListener('keydown', function(e) {
-            var action = keyToTurnMap[e.keyCode];
+            var keyMap = mode === Modes.FREE ? freeKeyToTurnMap : solvingKeyMap;
+            var action = keyMap[e.keyCode];
 
             if (action) {
                 action(e.shiftKey);
@@ -157,6 +171,39 @@ function onDocumentMouseDown(e) {
     }
 }
 
+// ***---*** STRING OF MOVES ***---*** //
+
+var MOVES = {
+    "U": doU,  "U2": function() { doU(doU); },  "U'": function() { doU(true) },
+    "F": doF,  "F2": function() { doF(doF); },  "F'": function() { doF(true) },
+    "D": doD,  "D2": function() { doD(doD); },  "D'": function() { doD(true) },
+    "B": doB,  "B2": function() { doB(doB); },  "B'": function() { doB(true) },
+    "L": doL,  "L2": function() { doL(doL); },  "L'": function() { doL(true) },
+    "R": doR,  "R2": function() { doR(doR); },  "R'": function() { doR(true) },
+};
+
+function doMoves(string) {
+    if (string !== "") {
+        mode = Modes.SOLVING;
+        currentMove = 0;
+        moves = string.split(" ");
+        console.log("Solving: " + string);
+    }
+}
+
+function nextMove() {
+    if (rotating) return;
+    if (currentMove >= moves.length) {
+        console.log("Done");
+        mode = Modes.FREE;
+        return;
+    }
+
+    console.log("Showing move: " + moves[currentMove]);
+    MOVES[moves[currentMove]]();
+    currentMove++;
+}
+
 // ***---*** ROTATION ***---*** //
 
 function getGroup(toRotate) {
@@ -181,7 +228,7 @@ function rotateCallback(toRotate, group) {
 }
 
 function getRotation(doPrime) {
-    return doPrime ? -Math.PI / 2 : Math.PI / 2;
+    return doPrime ? Math.PI / 2 : -Math.PI / 2;
 }
 
 function getCubes(face) {
@@ -219,69 +266,153 @@ function getCubes(face) {
 
 // do* functions perform cube instructions
 // @param doPrime  performs instruction CCW if true
-function doF(doPrime = false) {
+function doF(doPrime, callback) {
     if (rotating) return;
     rotating = true;
+
+    if (typeof doPrime === 'function') {
+        callback = doPrime;
+        doPrime = false;
+    } else {
+        if (typeof doPrime === 'undefined' || doPrime === null) {
+            doPrime = false;
+        } else {
+            doPrime = doPrime || false;
+        }
+
+        callback = callback || function() {};
+    }
 
     var toRotate = getCubes(0);
     var group = getGroup(toRotate);
     rotateAroundWorldAxis(group, Z_AXIS, getRotation(doPrime), function() {
         rotateCallback(toRotate, group);
+        callback();
     });
 }
 
-function doB(doPrime = false) {
+function doB(doPrime, callback) {
     if (rotating) return;
     rotating = true;
+
+    if (typeof doPrime === 'function') {
+        callback = doPrime;
+        doPrime = false;
+    } else {
+        if (typeof doPrime === 'undefined' || doPrime === null) {
+            doPrime = false;
+        } else {
+            doPrime = doPrime || false;
+        }
+
+        callback = callback || function() {};
+    }
 
     var toRotate = getCubes(1);
     var group = getGroup(toRotate);
-    rotateAroundWorldAxis(group, Z_AXIS, getRotation(doPrime), function() {
+    rotateAroundWorldAxis(group, Z_AXIS, -getRotation(doPrime), function() {
         rotateCallback(toRotate, group);
+        callback();
     });
 }
 
-function doL(doPrime = false) {
+function doL(doPrime, callback) {
     if (rotating) return;
     rotating = true;
+
+    if (typeof doPrime === 'function') {
+        callback = doPrime;
+        doPrime = false;
+    } else {
+        if (typeof doPrime === 'undefined' || doPrime === null) {
+            doPrime = false;
+        } else {
+            doPrime = doPrime || false;
+        }
+
+        callback = callback || function() {};
+    }
 
     var toRotate = getCubes(2);
     var group = getGroup(toRotate);
-    rotateAroundWorldAxis(group, X_AXIS, getRotation(doPrime), function() {
+    rotateAroundWorldAxis(group, X_AXIS, -getRotation(doPrime), function() {
         rotateCallback(toRotate, group);
+        callback();
     });
 }
 
-function doR(doPrime = false) {
+function doR(doPrime, callback) {
     if (rotating) return;
     rotating = true;
+
+    if (typeof doPrime === 'function') {
+        callback = doPrime;
+        doPrime = false;
+    } else {
+        if (typeof doPrime === 'undefined' || doPrime === null) {
+            doPrime = false;
+        } else {
+            doPrime = doPrime || false;
+        }
+
+        callback = callback || function() {};
+    }
 
     var toRotate = getCubes(3);
     var group = getGroup(toRotate);
     rotateAroundWorldAxis(group, X_AXIS, getRotation(doPrime), function() {
         rotateCallback(toRotate, group);
+        callback();
     });
 }
 
-function doU(doPrime = false) {
+function doU(doPrime, callback) {
     if (rotating) return;
     rotating = true;
+
+    if (typeof doPrime === 'function') {
+        callback = doPrime;
+        doPrime = false;
+    } else {
+        if (typeof doPrime === 'undefined' || doPrime === null) {
+            doPrime = false;
+        } else {
+            doPrime = doPrime || false;
+        }
+
+        callback = callback || function() {};
+    }
 
     var toRotate = getCubes(5);
     var group = getGroup(toRotate);
     rotateAroundWorldAxis(group, Y_AXIS, getRotation(doPrime), function() {
         rotateCallback(toRotate, group);
+        callback();
     });
 }
 
-function doD(doPrime = false) {
+function doD(doPrime, callback) {
     if (rotating) return;
     rotating = true;
 
+    if (typeof doPrime === 'function') {
+        callback = doPrime;
+        doPrime = false;
+    } else {
+        if (typeof doPrime === 'undefined' || doPrime === null) {
+            doPrime = false;
+        } else {
+            doPrime = doPrime || false;
+        }
+
+        callback = callback || function() {};
+    }
+
     var toRotate = getCubes(6);
     var group = getGroup(toRotate);
-    rotateAroundWorldAxis(group, Y_AXIS, getRotation(doPrime), function() {
+    rotateAroundWorldAxis(group, Y_AXIS, -getRotation(doPrime), function() {
         rotateCallback(toRotate, group);
+        callback();
     });
 }
 
@@ -297,7 +428,7 @@ function rotateAroundWorldAxis(object, axis, radians, callback) {
     }
 
     var t = new TWEEN.Tween(object.rotation)
-        .to(rot, 750)
+        .to(rot, 500)
         .easing(TWEEN.Easing.Elastic.Out)
         .onUpdate(function() {
             if (axis === Z_AXIS) {
