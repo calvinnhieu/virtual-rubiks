@@ -34,3 +34,16 @@ a:link, a:visited {
     bottom: 50px;
     font-size: 4em;
 }
+
+#confettiContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+#confetti {
+    width: 100%;
+    height: 100%;
+}
