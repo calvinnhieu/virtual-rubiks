@@ -286,7 +286,8 @@ function rotateAroundWorldAxis(object, axis, radians, callback) {
     }
 
     var t = new TWEEN.Tween(object.rotation)
-        .to(rot, 50)
+        .to(rot, 750)
+        .easing(TWEEN.Easing.Elastic.Out)
         .onUpdate(function() {
             if (axis === Z_AXIS) {
                 object.rotation.z = this.z;
