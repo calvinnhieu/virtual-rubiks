@@ -11,62 +11,16 @@
  *
  */
 var currentMoveElement;
-var canvas;
-
-var config = {
-  angle: 0.01,
-  tiltAngle: 0.1,
-  draw: draw,
-  updatePosition: updatePosition,
-  updateState: updateState
-};
-function draw(confetti) {
-  canvas.context.beginPath();
-  canvas.context.lineWidth = confetti.r / 2;
-  canvas.context.strokeStyle = confetti.color;
-  canvas.context.moveTo(confetti.x + confetti.tilt + (confetti.r / 4),
-    confetti.y);
-  canvas.context.lineTo(confetti.x + confetti.tilt, confetti.y +
-    confetti.tilt + (confetti.r / 4));
-  canvas.context.stroke();
-}
-function updatePosition(confetti, idx) {
-  confetti.tiltAngle += confetti.tiltAngleIncrement;
-  confetti.y += (Math.cos(config.angle + confetti.d) + 1 + confetti.r / 2) / 2;
-  confetti.x += Math.sin(config.angle);
-  confetti.tilt = 15 * Math.sin(confetti.tiltAngle - idx / 3);
-
-  if (confetti.isFlakeExiting(canvas)) {
-    if (idx % 5 > 0 || idx % 2 === 0) {
-      confetti.x = Confetti.randomFrom(0, canvas.width);
-      confetti.y = -10;
-      confetti.tilt = Confetti.randomFrom(-10, 0);
-
-    } else {
-      if (Math.sin(config.angle) > 0) {
-        confetti.x = -5;
-        confetti.y = Confetti.randomFrom(0, canvas.height);
-        confetti.tilt = Confetti.randomFrom(-10, 0);
-      } else {
-        confetti.x = canvas.width + 5;
-        confetti.y = Confetti.randomFrom(0, canvas.height);
-        confetti.tilt = Confetti.randomFrom(-10, 0);
-      }
-    }
-  }
-}
-function updateState() {
-  this.angle += 0.01;
-  this.tiltAngle += 0.1;
-}
 
 var Modes = {
     FREE: 0,
     SOLVING: 1
 }
-var mode = Modes.FREE;
+var mode;
+var freeLegend;
+var solvingLegend;
 
-var scene, camera, renderer, pivot;
+var scene, camera, renderer;
 var geometry, material;
 var cubeMeshArray = new Array();
 var controls;
@@ -104,10 +58,13 @@ var freeKeyToTurnMap = {
     52: function(shiftKeyDown) { doR(shiftKeyDown) }, // 4
     53: function(shiftKeyDown) { doU(shiftKeyDown) }, // 5
     54: function(shiftKeyDown) { doD(shiftKeyDown) }, // 6
+
+    48: reset,                                        // 0
 }
 
 var solvingKeyMap = {
-    39: nextMove        // right
+    39: nextMove, // rightsss
+    48: reset,    // 0
 }
 
 var X_AXIS;
@@ -122,6 +79,11 @@ function init() {
         canvas = Confetti.createCanvas(document.getElementById("confettiContainer"),
                                        document.getElementById("confetti"));
 
+        mode = Modes.FREE;
+        freeLegend = document.getElementById("free");
+        solvingLegend = document.getElementById("solving");
+        solvingLegend.style.visibility = "hidden";
+
         currentMoveElement = document.getElementById("current_move");
 
         X_AXIS = new THREE.Vector3(1, 0, 0);
@@ -131,7 +93,6 @@ function init() {
         raycaster = new THREE.Raycaster();
         mouse = new THREE.Vector2();
         scene = new THREE.Scene();
-        pivot = new THREE.Object3D();
 
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
         camera.position.z = 1000;
@@ -158,19 +119,7 @@ function init() {
             vertexColors: THREE.FaceColors
         });
 
-        // create cube pieces
-        for (var i = 0; i < 27; i++) {
-            cubeMeshArray[i] = new THREE.Mesh(geometry, material);
-            cubeMeshArray[i].position.x = (i * (SIZE + MARGIN)) % ((SIZE + MARGIN) * 3) - (SIZE + MARGIN);
-            cubeMeshArray[i].position.y = (Math.floor((i % 9) / 3) * (SIZE + MARGIN)) - (SIZE + MARGIN);
-            cubeMeshArray[i].position.z = Math.floor(i / 9) * (SIZE + MARGIN) - (SIZE + MARGIN);
-            cubeMeshArray[i].callback = function() {
-                console.log('click piece');
-            }
-            scene.add(cubeMeshArray[i]);
-        }
-
-        scene.add(pivot);
+        resetCubelets();
 
         renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -196,8 +145,34 @@ function init() {
         animate();
         render();
 
-        doMoves("D2 B' R' B L' B")
+        // doMoves("D2 B' R' B L' B")
     }, 500);
+}
+
+function reset() {
+    mode = Modes.FREE;
+    solvingLegend.style.visibility = "hidden";
+    resetCubelets();
+}
+
+function resetCubelets() {
+    for (var i = 0; i < cubeMeshArray.length; i++) {
+        scene.remove(cubeMeshArray[i]);
+        delete cubeMeshArray[i];
+    }
+
+    cubeMeshArray = [];
+    // create cube pieces
+    for (var i = 0; i < 27; i++) {
+        cubeMeshArray[i] = new THREE.Mesh(geometry, material);
+        cubeMeshArray[i].position.x = (i * (SIZE + MARGIN)) % ((SIZE + MARGIN) * 3) - (SIZE + MARGIN);
+        cubeMeshArray[i].position.y = (Math.floor((i % 9) / 3) * (SIZE + MARGIN)) - (SIZE + MARGIN);
+        cubeMeshArray[i].position.z = Math.floor(i / 9) * (SIZE + MARGIN) - (SIZE + MARGIN);
+        cubeMeshArray[i].callback = function() {
+            console.log('click piece');
+        }
+        scene.add(cubeMeshArray[i]);
+    }
 }
 
 function animate() {
@@ -242,6 +217,7 @@ var MOVES = {
 function doMoves(string) {
     if (string !== "") {
         mode = Modes.SOLVING;
+        freeLegend.style.visibility = "hidden";
         currentMove = 0;
         moves = string.split(" ");
         console.log("Solving: " + string);
@@ -254,6 +230,7 @@ function nextMove() {
         console.log("Done");
         currentMoveElement.innerHTML = "Solved!";
         mode = Modes.FREE;
+        solvingLegend.style.visibility = "hidden";
 
         var particles = _.range(0, Confetti.DEFAULT_NUM).map(function () {
           return Confetti.create({

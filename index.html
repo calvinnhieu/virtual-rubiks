@@ -3,6 +3,7 @@
 <html>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
   <script src="confetti.js"></script>
+  <script src="confettiCube.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
   <script src="index.js"></script>
   <script src="three.min.js"></script>
@@ -23,8 +24,20 @@
       <div class="legend">
         <p>Drag to scan.</p>
         <p>Scroll to zoom.</p>
-        <p>CW : f b l r u d</p>
-        <p>CCW: F B L R U D</p>
+
+        <p>0 to reset the cube.</p>
+
+        <div id="free">
+            <p>Currently in free mode.</p>
+            <p>CW : f b l r u d</p>
+            <p>CCW: F B L R U D</p>
+        </div>
+
+        <div id="solving">
+            <p>Currently in solving mode.</p>
+            <p>Right arrow to advance to next move.</p>
+            <p>e to exit solving mode.</p>
+        </div>
       </div>
     </div>
 
