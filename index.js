@@ -15,6 +15,8 @@ var geometry, material;
 var cubeMeshArray = new Array();
 var controls;
 
+var raycaster, mouse;
+
 var SIZE = 100;
 var MARGIN = 5;
 
@@ -26,6 +28,7 @@ var YELLOW = 0xffeb3b;
 var WHITE = 0xffffff;
 
 var CUBE_COLORS = [RED, GREEN, BLUE, ORANGE, YELLOW, WHITE];
+// TODO: replace with mouse drag events
 var keyToTurnMap = {
   49: function(shiftKeyDown) { doF(shiftKeyDown) }, // 1
   50: function(shiftKeyDown) { doB(shiftKeyDown) }, // 2
@@ -48,6 +51,8 @@ function init() {
     Y_AXIS = new THREE.Vector3(0,1,0);
     Z_AXIS = new THREE.Vector3(0,0,1);
 
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
@@ -78,6 +83,7 @@ function init() {
       cubeMeshArray[i].position.x = (i * (SIZE+MARGIN)) % ((SIZE+MARGIN)*3) - SIZE*3/2;
       cubeMeshArray[i].position.y = (Math.floor((i%9)/3) * (SIZE+MARGIN)) - SIZE*3/2;
       cubeMeshArray[i].position.z = Math.floor(i/9) * (SIZE+MARGIN) - SIZE*3/2;
+      cubeMeshArray[i].callback = function() { console.log('click piece'); }
       scene.add( cubeMeshArray[i] );
     }
 
@@ -91,6 +97,9 @@ function init() {
       if (action) {
         action(e.shiftKey);
       }
+    });
+    document.addEventListener('mousedown', function(e) {
+      onDocumentMouseDown(e);
     });
 
     document.body.appendChild( renderer.domElement );
@@ -106,6 +115,22 @@ function animate() {
 
 function render() {
   renderer.render(scene, camera);
+}
+
+// source: http://stackoverflow.com/questions/12800150/catch-the-click-event-on-a-specific-mesh-in-the-renderer
+function onDocumentMouseDown(e) {
+  e.preventDefault();
+
+  mouse.x = ( e.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+  mouse.y = - ( e.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+
+  raycaster.setFromCamera( mouse, camera );
+
+  var intersects = raycaster.intersectObjects(cubeMeshArray);
+
+  if (intersects.length > 0) {
+      intersects[0].object.callback();
+  }
 }
 
 // do* functions perform cube instructions
