@@ -21,13 +21,13 @@ var SIZE = 100;
 var MARGIN = 5;
 
 var RED = 0xf44336;
+var ORANGE = 0xff9800;
+var WHITE = 0xffffff;
+var YELLOW = 0xffeb3b;
 var GREEN = 0x4cAf50;
 var BLUE = 0x2196f3;
-var ORANGE = 0xff9800;
-var YELLOW = 0xffeb3b;
-var WHITE = 0xffffff;
 
-var CUBE_COLORS = [RED, GREEN, BLUE, ORANGE, YELLOW, WHITE];
+var CUBE_COLORS = [RED, ORANGE, WHITE, YELLOW, GREEN, BLUE];
 // TODO: replace with mouse drag events
 var keyToTurnMap = {
   49: function(shiftKeyDown) { doF(shiftKeyDown) }, // 1
