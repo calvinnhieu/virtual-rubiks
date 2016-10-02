@@ -72,8 +72,8 @@ function init() {
     // init cube piece geometry and colors
     geometry = new THREE.BoxGeometry(SIZE, SIZE, SIZE);
     for ( var i = 0; i < geometry.faces.length; i+=2  ) {
-        geometry.faces[ i ].color.setHex(CUBE_COLORS[i/2]);
-        geometry.faces[ i+1 ].color.setHex(CUBE_COLORS[i/2]);
+      geometry.faces[ i ].color.setHex(CUBE_COLORS[i/2]);
+      geometry.faces[ i+1 ].color.setHex(CUBE_COLORS[i/2]);
     }
     material = new THREE.MeshBasicMaterial( { color: 0xffffff, vertexColors: THREE.FaceColors } );
 
@@ -129,7 +129,8 @@ function onDocumentMouseDown(e) {
   var intersects = raycaster.intersectObjects(cubeMeshArray);
 
   if (intersects.length > 0) {
-      intersects[0].object.callback();
+      // intersects[0].object.callback();
+      // console.log(intersects[0].object);
   }
 }
 
@@ -180,16 +181,8 @@ function doD(doPrime = false) {
   }
 }
 
-// These functions rotate mesh objects about an axis
+// This function rotates mesh objects about the world axis
 // source: http://stackoverflow.com/questions/11060734/how-to-rotate-a-3d-object-on-axis-three-js
-var rotObjectMatrix;
-function rotateAroundObjectAxis(object, axis, radians) {
-    rotObjectMatrix = new THREE.Matrix4();
-    rotObjectMatrix.makeRotationAxis(axis.normalize(), radians);
-    object.matrix.multiply(rotObjectMatrix);
-    object.rotation.setFromRotationMatrix(object.matrix);
-}
-
 var rotWorldMatrix;
 // Rotate an object around an arbitrary axis in world space
 function rotateAroundWorldAxis(object, axis, radians) {
