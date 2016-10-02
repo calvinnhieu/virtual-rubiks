@@ -26,3 +26,11 @@ a:link, a:visited {
   bottom: 20px;
   opacity: 0;
 }
+
+#current_move {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    bottom: 50px;
+    font-size: 4em;
+}

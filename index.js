@@ -10,6 +10,8 @@
  * Hold shift to perform CCW rotations.
  *
  */
+var currentMoveElement;
+
 var Modes = {
     FREE: 0,
     SOLVING: 1
@@ -69,6 +71,8 @@ init();
 function init() {
     // waits for three.js to load
     setTimeout(function() {
+        currentMoveElement = document.getElementById("current_move");
+
         X_AXIS = new THREE.Vector3(1, 0, 0);
         Y_AXIS = new THREE.Vector3(0, 1, 0);
         Z_AXIS = new THREE.Vector3(0, 0, 1);
@@ -140,6 +144,8 @@ function init() {
         document.body.appendChild(renderer.domElement);
         animate();
         render();
+
+        doMoves("D2 B' R' B L' B")
     }, 500);
 }
 
@@ -195,11 +201,13 @@ function nextMove() {
     if (rotating) return;
     if (currentMove >= moves.length) {
         console.log("Done");
+        currentMoveElement.innerHTML = "Solved!";
         mode = Modes.FREE;
         return;
     }
 
     console.log("Showing move: " + moves[currentMove]);
+    currentMoveElement.innerHTML = moves[currentMove];
     MOVES[moves[currentMove]]();
     currentMove++;
 }
