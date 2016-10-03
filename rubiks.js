@@ -74,7 +74,7 @@ var freeKeyToTurnMap = {
 
 var solvingKeyMap = {
     39: faster, // right
-    48: reset,  // 0
+    37: slower, // left
 }
 
 var X_AXIS;
@@ -99,7 +99,8 @@ function init() {
         mode = Modes.FREE;
         freeLegend = document.getElementById("free");
         solvingLegend = document.getElementById("solving");
-        solvingLegend.style.visibility = "hidden";
+        freeLegend.style.display = "block";
+        solvingLegend.style.display = "none";
 
         currentMoveElement = document.getElementById("current_move");
 
@@ -164,7 +165,8 @@ function init() {
 function reset() {
     if (rotating) return;
     mode = Modes.FREE;
-    solvingLegend.style.visibility = "hidden";
+    freeLegend.style.display = "block";
+    solvingLegend.style.display = "none";
     freeCube.identity();
     resetCubelets();
 }
@@ -221,6 +223,8 @@ var MOVES = {
 
 function doSolve() {
     mode = Modes.SOLVING;
+    freeLegend.style.display = "none";
+    solvingLegend.style.display = "block";
     turnTime = 750;
     doMoves(freeCube.solve());
 }
@@ -228,7 +232,8 @@ function doSolve() {
 function doMoves(string, doConfetti = true) {
     if (string !== "") {
         mode = Modes.SOLVING;
-        freeLegend.style.visibility = "hidden";
+        solvingLegend.style.display = "block";
+        freeLegend.style.display = "none";
         currentMove = 0;
         moves = string.split(" ");
         console.log("Solving: " + string);
@@ -238,6 +243,10 @@ function doMoves(string, doConfetti = true) {
 
 function faster() {
     turnTime *= 0.7;
+}
+
+function slower() {
+    turnTime *= 1.3;
 }
 
 function buildScrambleView(moves, currentMove) {
@@ -289,7 +298,8 @@ function nextMove(doConfetti) {
             }, 2000);
 
             mode = Modes.FREE;
-            solvingLegend.style.visibility = "hidden";
+            freeLegend.style.display = "block";
+            solvingLegend.style.display = "none";
             return;
         }
 
