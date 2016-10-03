@@ -24,6 +24,8 @@ function updatePosition(confetti, idx) {
     confetti.tilt = 15 * Math.sin(confetti.tiltAngle - idx / 3);
 
     if (confetti.isFlakeExiting(canvas)) {
+        return;
+
         if (idx % 5 > 0 || idx % 2 === 0) {
             confetti.x = Confetti.randomFrom(0, canvas.width);
             confetti.y = -10;

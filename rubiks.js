@@ -15,6 +15,7 @@ var TrackballControls = require('three-trackballcontrols');
 var Cube = require('./lib/cube');
 require('./lib/solve');
 
+var turnTime;
 var freeCube;
 
 var currentMoveElement;
@@ -67,13 +68,13 @@ var freeKeyToTurnMap = {
     54: function(shiftKeyDown) { doD(shiftKeyDown) }, // 6
 
     48: reset,                                        // 0
-
+    77: randomize,                                    // m
     83: doSolve,                                      // s
 }
 
 var solvingKeyMap = {
-    39: nextMove, // rightsss
-    48: reset,    // 0
+    39: faster, // right
+    48: reset,  // 0
 }
 
 var X_AXIS;
@@ -85,6 +86,8 @@ init();
 function init() {
     // waits for three.js to load
     setTimeout(function() {
+        turnTime = 750;
+
         freeCube = new Cube();
         Cube.initSolver();
         document.getElementById("pre").style.display = "none";
@@ -151,9 +154,6 @@ function init() {
                 el.style.opacity = el.style.opacity == 0 ? 1 : 0;
             }
         });
-        document.addEventListener('mousedown', function(e) {
-            onDocumentMouseDown(e);
-        });
 
         document.body.appendChild(renderer.domElement);
         animate();
@@ -200,21 +200,12 @@ function render() {
     renderer.render(scene, camera);
 }
 
-// source: http://stackoverflow.com/questions/12800150/catch-the-click-event-on-a-specific-mesh-in-the-renderer
-function onDocumentMouseDown(e) {
-    e.preventDefault();
-
-    mouse.x = (e.clientX / renderer.domElement.clientWidth) * 2 - 1;
-    mouse.y = -(e.clientY / renderer.domElement.clientHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-
-    var intersects = raycaster.intersectObjects(cubeMeshArray);
-
-    if (intersects.length > 0) {
-        // intersects[0].object.callback();
-        // console.log(intersects[0].object);
-    }
+function randomize() {
+    if (rotating) return;
+    turnTime = 100;
+    var c = new Cube();
+    c.randomize();
+    doMoves(c.solve(), false);
 }
 
 // ***---*** STRING OF MOVES ***---*** //
@@ -230,18 +221,23 @@ var MOVES = {
 
 function doSolve() {
     mode = Modes.SOLVING;
+    turnTime = 750;
     doMoves(freeCube.solve());
 }
 
-function doMoves(string) {
+function doMoves(string, doConfetti = true) {
     if (string !== "") {
         mode = Modes.SOLVING;
         freeLegend.style.visibility = "hidden";
         currentMove = 0;
         moves = string.split(" ");
         console.log("Solving: " + string);
-        nextMove();
+        nextMove(doConfetti);
     }
+}
+
+function faster() {
+    turnTime *= 0.7;
 }
 
 function buildScrambleView(moves, currentMove) {
@@ -255,33 +251,49 @@ function buildScrambleView(moves, currentMove) {
     return html;
 }
 
-function nextMove() {
+function getParticles(max) {
+    max = max || Confetti.DEFAULT_NUM;
+    return _.range(0, max).map(function () {
+      return Confetti.create({
+        x: Confetti.randomFrom(0, canvas.width),
+        y: 0,
+        r: Confetti.randomFrom(5, 30),
+        tilt: Confetti.randomFrom(-10, 0),
+        tiltAngle: 0,
+        tiltAngleIncrement: Confetti.randomFrom(0.05, 0.12, 100)
+      });
+    });
+}
+
+function nextMove(doConfetti) {
     if (rotating || mode != Modes.SOLVING) return;
     console.log("Showing move: " + moves[currentMove]);
     currentMoveElement.innerHTML = buildScrambleView(moves, currentMove);
     MOVES[moves[currentMove]](function() {
         if (currentMove >= moves.length) {
-            console.log("Done");
-            currentMoveElement.innerHTML = "Solved!";
+            if (doConfetti) {
+                currentMoveElement.innerHTML = "Solved!";
+
+                canvas.destroy();
+                canvas = Confetti.createCanvas(document.getElementById("confettiContainer"),
+                                               document.getElementById("confetti"));
+                var c = Confetti.DEFAULT_NUM;
+                var particles = getParticles(c);
+                canvas.step(particles, config)();
+            } else {
+                currentMoveElement.innerHTML = "Scrambled.";
+            }
+
+            setTimeout(function() {
+                currentMoveElement.innerHTML = "";
+            }, 2000);
+
             mode = Modes.FREE;
             solvingLegend.style.visibility = "hidden";
-
-            var particles = _.range(0, Confetti.DEFAULT_NUM).map(function () {
-              return Confetti.create({
-                x: Confetti.randomFrom(0, canvas.width),
-                y: 0,
-                r: Confetti.randomFrom(5, 30),
-                tilt: Confetti.randomFrom(-10, 0),
-                tiltAngle: 0,
-                tiltAngleIncrement: Confetti.randomFrom(0.05, 0.12, 100)
-              });
-            });
-            canvas.step(particles, config)();
-
             return;
         }
 
-        nextMove();
+        nextMove(doConfetti);
     });
     currentMove++;
 }
@@ -516,7 +528,7 @@ function rotateAroundWorldAxis(object, axis, radians, callback) {
     }
 
     var t = new TWEEN.Tween(object.rotation)
-        .to(rot, 500)
+        .to(rot, turnTime)
         .easing(TWEEN.Easing.Elastic.Out)
         .onUpdate(function() {
             if (axis === Z_AXIS) {
